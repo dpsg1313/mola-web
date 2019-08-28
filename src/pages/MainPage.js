@@ -1,23 +1,48 @@
-import React, { Component } from 'react'
-import RaisedButton from 'material-ui/RaisedButton';
-import { Redirect } from 'react-router-dom';
+import React, { Component } from 'react';
 import { withRouter } from 'react-router';
+import { withStyles } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import AddIcon from '@material-ui/icons/Add';
+import Dialog from '@material-ui/core/Dialog';
 
-import QRScanner from '../components/QRScanner';
-import FakeQRScanner from '../components/FakeQRScanner';
-import * as AuthStore from '../stores/AuthStore';
+import moment from 'moment';
+
+import QRScanner from '../components/qrscanner/QRScanner';
+import AuthStore from '../stores/AuthStore';
+import * as HistoryStore from '../stores/HistoryStore';
 import Page from '../Page';
+import History from '../components/History';
+import ActionMenu from '../components/ActionMenu';
 
-const margin = {
-    margin: 12
-};
+const styles = theme => ({
+    button: {
+        margin: theme.spacing.unit,
+    },
+    extendedIcon: {
+        marginRight: theme.spacing.unit,
+    },
+    fab: {
+        margin: 0,
+        top: 'auto',
+        right: 20,
+        bottom: 20,
+        left: 'auto',
+        position: 'fixed',
+    },
+    menuButton: {
+        marginLeft: -12,
+        marginRight: 20,
+    },
+});
 
 class MainPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
             isScanning: false,
-            isLoggedIn: false
+            isLoggedIn: false,
+            loading: true
         };
     }
 
@@ -38,33 +63,68 @@ class MainPage extends Component {
     handleScannedId = (id) => {
         this.setState({isScanning: false});
         if(id){
+            if(id !== AuthStore.getUserId()){
+                HistoryStore.set(id, moment());
+            }
             this.props.history.push('profile/' + id);
         }
     }
 
+    handleScannerClosed = () => {
+        this.setState({ isScanning: false });
+    }
+
+    onProfileClick = (profileId) => {
+        console.log('Profile Click');
+
+        this.props.history.push('profile/' + profileId);
+    }
+
+    onHistoryLoaded = () => {
+        this.setState({
+            loading: false,
+        });
+    }
+
     render() {
-        if(this.state.isScanning){
+        const { classes } = this.props;
+        if(this.state.isLoggedIn){
             return (
-                <Page title='MOLA'>
-                    <FakeQRScanner onScannedId={this.handleScannedId}/> : }
-                </Page>
-            )
-        }else if(this.state.isLoggedIn){
-            return (
-                <Page title='MOLA'>
-                    <div><RaisedButton style={margin} label='Mein Profil bearbeiten' onClick={() => this.props.history.push('/edit')} /></div>
-                    <div><RaisedButton style={margin} label='Code scannen' onClick={() => this.setState({isScanning: true})} /></div>
-                    <RaisedButton style={margin} label='Logout' onClick={this.logout} />
+                <Page title='MOLA' toolbar={<ActionMenu onLogout={this.logout} />} loading={this.state.loading}>
+                    <History onProfileClick={this.onProfileClick} onLoaded={this.onHistoryLoaded} />
+                    <Dialog
+                        fullScreen
+                        open={this.state.isScanning}
+                        onClose={this.handleScannerClosed}
+                    >
+                        <QRScanner onScannedId={this.handleScannedId}/>
+                        <Button
+                            onClick={() => this.setState({isScanning: false})}
+                            className={classes.button}
+                        >
+                            Abbrechen
+                        </Button>
+                    </Dialog>
+                    <Button color='primary' variant="extendedFab" aria-label="Scannen" className={classes.fab} onClick={() => this.setState({isScanning: true})}>
+                        <AddIcon className={classes.extendedIcon} />
+                        Code scannen
+                    </Button>
                 </Page>
             )
         }else{
             return (
-                <Page title='MOLA'>
-                    <RaisedButton style={margin} label='Login' onClick={() => this.props.history.replace('/login')} />
+                <Page title='MOLA' loading={false}>
+                    <div align='center'>
+                        <Typography variant="headline" align="center">Willkommen bei MOLA!</Typography>
+                        <Typography variant="body2" align="center">Wenn du schon einen Account hast,<br/>dann logge dich bitte ein:</Typography>
+                        <Button variant="contained" className={classes.button} onClick={() => this.props.history.push('/login')}>Einloggen</Button>
+                        <Typography variant="body2" align="center">Wenn nicht,<br/>kannst du dir in nur 3 Schritten einen Account erstellen:</Typography>
+                        <Button variant="contained" className={classes.button} onClick={() => this.props.history.push('/register')}>Account erstellen</Button>
+                    </div>
                 </Page>
             )
         }
     }
 }
 
-export default withRouter(MainPage);
+export default withStyles(styles)(withRouter(MainPage));

@@ -2,10 +2,16 @@
   "name": "molareact",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://molatest.dpsg1313.de",
   "dependencies": {
+    "@material-ui/core": "^1.4.0",
+    "@material-ui/icons": "^1.1.0",
+    "cra-append-sw": "^2.5.0",
     "dexie": "^2.0.3",
-    "material-ui": "^0.20.0",
+    "moment": "^2.22.2",
     "react": "^16.3.2",
+    "react-avatar-editor": "^11.0.4",
+    "react-cropper": "^1.0.1",
     "react-dom": "^16.3.2",
     "react-qr-reader": "^2.1.0",
     "react-router": "^4.2.0",
@@ -16,6 +22,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "extend-sw": "cra-append-sw ./service-worker-extension.js",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }

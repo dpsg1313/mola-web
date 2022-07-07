@@ -8,7 +8,7 @@
     "@material-ui/icons": "^1.1.0",
     "cra-append-sw": "^2.5.0",
     "dexie": "^2.0.3",
-    "moment": "^2.22.2",
+    "moment": "^2.29.4",
     "react": "^16.3.2",
     "react-avatar-editor": "^11.0.4",
     "react-cropper": "^1.0.1",
